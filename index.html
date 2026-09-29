@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>After.Cyanide's Corner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet" />
+<style>
+    :root {
+        --bg: #0d0d0f;
+        --surface: #1c1c21;
+        --surface-hi: #26262d;
+        --border: #2e2e36;
+        --text: #f2f2f4;
+        --muted: #9a9aa5;
+        --accent: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+        margin: 0;
+        min-height: 100%;
+        background: #000;
+        color: var(--text);
+        font-family: "VT323", "Courier New", monospace;
+        font-size: 19px;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* star-shower background */
+    #stars {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        z-index: 0;
+    }
+
+    body {
+        display: flex;
+        justify-content: center;
+        padding: 56px 20px 72px;
+    }
+
+    .page {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 460px;
+    }
+
+    /* ---------- Header ---------- */
+    .profile {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .profile h1 {
+        margin: 0;
+        font-size: 40px;
+        font-weight: 400;
+        letter-spacing: 1px;
+        color: var(--text);
+        text-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
+    }
+
+    .profile p {
+        margin: 4px 0 0;
+        font-size: 20px;
+        letter-spacing: 1px;
+        color: var(--muted);
+    }
+
+    /* ---------- Views ---------- */
+    .view {
+        display: none;
+    }
+
+    .view.active {
+        display: block;
+        animation: fade 0.18s ease;
+    }
+
+    @keyframes fade {
+        from { opacity: 0; transform: translateY(6px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---------- Back button ---------- */
+    .back {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 18px;
+        padding: 8px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: linear-gradient(180deg, var(--surface-hi), var(--surface));
+        color: var(--text);
+        font: inherit;
+        font-size: 19px;
+        font-weight: 400;
+        cursor: pointer;
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 4px 12px rgba(0, 0, 0, 0.4);
+        transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+
+    .back:hover {
+        transform: translateX(-2px);
+        border-color: #4a4a56;
+    }
+
+    .view-title {
+        margin: 0 0 16px;
+        font-size: 22px;
+        font-weight: 400;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--muted);
+    }
+
+    /* ---------- Folder cards (home) ---------- */
+    .folder-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        padding: 11px 16px;
+        margin-top: 14px;
+        border-radius: 11px;
+        border: 1px solid var(--border);
+        background: linear-gradient(180deg, var(--surface-hi), var(--surface));
+        color: var(--text);
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 4px 12px rgba(0, 0, 0, 0.4);
+        transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+    }
+
+    .folder-card:hover,
+    .folder-card:focus-visible {
+        transform: translateY(-2px);
+        border-color: #4a4a56;
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.12) inset, 0 12px 28px rgba(0, 0, 0, 0.6);
+        outline: none;
+    }
+
+    .folder-card .folder-icon {
+        font-size: 18px;
+        line-height: 1;
+    }
+
+    .folder-card .folder-meta {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+    }
+
+    .folder-card .folder-name {
+        font-size: 20px;
+        font-weight: 400;
+    }
+
+    .folder-card .folder-count {
+        font-size: 17px;
+        color: var(--muted);
+    }
+
+    .folder-card .chev {
+        color: var(--muted);
+        font-size: 18px;
+        transition: transform 0.16s ease, color 0.16s ease;
+    }
+
+    .folder-card:hover .chev {
+        color: var(--accent);
+        transform: translateX(3px);
+    }
+
+    /* ---------- Links ---------- */
+    .links {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .link {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 16px;
+        border-radius: 11px;
+        text-decoration: none;
+        color: var(--text);
+        background:
+            linear-gradient(180deg, var(--tinge, transparent), var(--tinge, transparent)),
+            linear-gradient(180deg, var(--surface-hi), var(--surface));
+        border: 1px solid var(--border);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.06) inset,
+            0 4px 12px rgba(0, 0, 0, 0.4);
+        transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+        overflow: hidden;
+    }
+
+    /* glossy sheen */
+    .link::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 50%;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0));
+        pointer-events: none;
+    }
+
+    .link:hover,
+    .link:focus-visible {
+        transform: translateY(-2px);
+        border-color: #4a4a56;
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.12) inset,
+            0 12px 28px rgba(0, 0, 0, 0.6),
+            0 0 0 1px rgba(255, 255, 255, 0.05);
+        outline: none;
+    }
+
+    .link:active {
+        transform: translateY(0);
+    }
+
+    .meta {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .meta .name {
+        display: block;
+        font-size: 20px;
+        font-weight: 400;
+        line-height: 1.2;
+    }
+
+    .chev {
+        flex-shrink: 0;
+        color: var(--muted);
+        font-size: 18px;
+        transition: transform 0.16s ease, color 0.16s ease;
+    }
+
+    .link:hover .chev,
+    .link:focus-visible .chev {
+        color: var(--accent);
+        transform: translateX(3px);
+    }
+</style>
+</head>
+<body>
+    <canvas id="stars"></canvas>
+
+    <div class="page">
+        <header class="profile">
+            <h1>After.Cyanide's Corner</h1>
+            <p>My STUFF&trade;</p>
+        </header>
+
+        <main>
+            <section class="view active" id="view-home"></section>
+            <section class="view" id="view-folder"></section>
+        </main>
+    </div>
+
+    <script>
+        /*
+         * ============================================================
+         *  PROJECT REGISTRY
+         *
+         *  LINKS   -> loose projects shown directly on the home view
+         *             (Vercel / GitHub / AI Studio, etc.)
+         *  SECTIONS -> folders for smaller stuff; clicking one opens
+         *             a folder view with its files and a back button.
+         *
+         *  Each item can be either:
+         *    { url: "https://...", ... }  -> external link (new tab)
+         *    { file: "x.html", ... }      -> local file (folder/file)
+         * ============================================================
+         */
+        const LINKS = [
+            { url: "https://text-corruptor.vercel.app/", code: "TC", name: "Text Corruptor" },
+            { url: "https://deja-vu-and-three-gen-analyser.vercel.app/", code: "DV", name: "Déjà-Vu / Three-gen Analyser" },
+            { url: "https://webp-glitcher.vercel.app/", code: "WG", name: "WebP Glitcher" },
+            { file: "apps/system-shock-junction/", code: "SS", name: "System Shock Junction Box Emulator" },
+            { file: "apps/banned-word-finder/", code: "BW", name: "Banned Word Finder" },
+            { file: "apps/lasso-text-selector/", code: "LS", name: "Lasso Text Selector" },
+            { file: "apps/local-file-triege/", code: "LF", name: "Local File Triege" },
+            { file: "apps/random-gallery/", code: "RG", name: "Random Gallery" }
+            // Add more loose projects here:
+            // { url: "https://...", code: "XX", name: "..." }
+            // { file: "apps/name/", code: "XX", name: "..." }
+        ];
+
+        const SECTIONS = [
+            {
+                title: "HTML Projects",
+                folder: "html projects",
+                items: [
+                    { file: "BJ.html", code: "BJ", name: "Paw-Pad 2100" },
+                    { file: "CL.html", code: "CL", name: "Captain's Log" },
+                    { file: "PL.html", code: "PL", name: "Planet Log" },
+                    { file: "RT.html", code: "RT", name: "Records" },
+                    { file: "SR.html", code: "SR", name: "Mission Dossier" }
+                ]
+            }
+            // Add more folders like this later:
+            // { title: "Art", folder: "art", items: [ { file: "x.html", code: "X", name: "..." } ] }
+        ];
+
+        const homeView = document.getElementById("view-home");
+        const folderView = document.getElementById("view-folder");
+
+        function showView(view) {
+            homeView.classList.toggle("active", view === "home");
+            folderView.classList.toggle("active", view === "folder");
+            window.scrollTo(0, 0);
+        }
+
+        /* ---------- Build a single link element ---------- */
+        // subtle 5% colour tinges, cycled per link
+        const TINGES = [
+            "rgba(255, 80, 80, 0.05)",    // red
+            "rgba(255, 170, 60, 0.05)",   // orange
+            "rgba(255, 235, 90, 0.05)",   // yellow
+            "rgba(90, 220, 120, 0.05)",   // green
+            "rgba(80, 200, 235, 0.05)",   // cyan
+            "rgba(110, 140, 255, 0.05)",  // blue
+            "rgba(190, 120, 255, 0.05)"   // purple
+        ];
+        let tingeIndex = 0;
+
+        function makeLink(entry, folder) {
+            const a = document.createElement("a");
+            a.className = "link";
+            a.style.setProperty("--tinge", TINGES[tingeIndex++ % TINGES.length]);
+
+            const external = !!entry.url;
+            a.href = external ? entry.url : (folder ? folder + "/" : "") + entry.file;
+            if (external) {
+                a.target = "_blank";
+                a.rel = "noopener noreferrer";
+            }
+
+            a.innerHTML =
+                '<span class="meta">' +
+                    '<span class="name">' + entry.name + '</span>' +
+                '</span>' +
+                '<span class="chev">' + (external ? '&#8599;' : '&#8250;') + '</span>';
+            return a;
+        }
+
+        /* ---------- Home view: loose links, then folder cards ---------- */
+        if (LINKS.length) {
+            const group = document.createElement("div");
+            group.className = "links";
+            LINKS.forEach(function (entry) {
+                group.appendChild(makeLink(entry, ""));
+            });
+            homeView.appendChild(group);
+        }
+
+        SECTIONS.forEach(function (section) {
+            const card = document.createElement("button");
+            card.type = "button";
+            card.className = "folder-card";
+            card.innerHTML =
+                '<span class="folder-icon">&#128193;</span>' +
+                '<span class="folder-meta">' +
+                    '<span class="folder-name">' + section.title + '</span>' +
+                    '<span class="folder-count">' + section.items.length +
+                        ' file' + (section.items.length === 1 ? "" : "s") + '</span>' +
+                '</span>' +
+                '<span class="chev">&#8250;</span>';            card.addEventListener("click", function () {
+                openFolder(section);
+            });
+            homeView.appendChild(card);
+        });
+
+        /* ---------- Folder view: back button + file links ---------- */
+        function openFolder(section) {
+            folderView.innerHTML = "";
+
+            const back = document.createElement("button");
+            back.type = "button";
+            back.className = "back";
+            back.innerHTML = '&#8592; Back';
+            back.addEventListener("click", function () {
+                showView("home");
+            });
+            folderView.appendChild(back);
+
+            const title = document.createElement("h2");
+            title.className = "view-title";
+            title.textContent = section.title;
+            folderView.appendChild(title);
+
+            const group = document.createElement("div");
+            group.className = "links";
+
+            section.items.forEach(function (entry) {
+                group.appendChild(makeLink(entry, section.folder));
+            });
+
+            folderView.appendChild(group);
+            showView("folder");
+        }
+
+        /* ============================================================
+         *  STAR-SHOWER BACKGROUND
+         *  Pixel-art diamond stars falling diagonally (~20° left)
+         *  with a short fading trail and an occasional sparkle.
+         *  Rarely, a random emoji falls instead of a star.
+         * ============================================================ */
+        (function () {
+            const canvas = document.getElementById("stars");
+            const ctx = canvas.getContext("2d");
+            let w, h, stars;
+
+            const ANGLE = 20 * Math.PI / 180;   // 20° to the left
+            const DX = -Math.sin(ANGLE);         // horizontal step
+            const DY = Math.cos(ANGLE);          // vertical step
+
+            const EMOJI_MIN_MS = 10000;          // earliest next emoji (10s)
+            const EMOJI_MAX_MS = 16000;          // latest next emoji (16s)
+            const EMOJIS = [
+                "🍞", "🦝", "👾", "🛸", "🚀", "🪐", "👽", "🐸", "🍕",
+                "🐰", "🦦"
+            ];
+
+            // time-gated emoji spawn: at most one every 10-16 seconds
+            let nextEmojiAt = Date.now() + EMOJI_MIN_MS + Math.random() * (EMOJI_MAX_MS - EMOJI_MIN_MS);
+
+            function resize() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            }
+
+            function makeStar() {
+                return {
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    r: 2 + Math.floor(Math.random() * 2),   // diamond radius 2-3px
+                    speed: 1.2 + Math.random() * 2.2,
+                    alpha: 0.4 + Math.random() * 0.6,
+                    glint: Math.random() < 0.45,              // sparkle cross
+                    emoji: null,
+                    size: 18 + Math.random() * 10             // emoji font size
+                };
+            }
+
+            // turn a random star into an emoji falling from the top
+            function spawnEmoji() {
+                if (!stars.length) return;
+                const s = stars[Math.floor(Math.random() * stars.length)];
+                s.emoji = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+                s.size = 18 + Math.random() * 10;
+                s.x = Math.random() * w;
+                s.y = -s.size;
+                s.speed = 1.2 + Math.random() * 2.2;
+                s.alpha = 0.4 + Math.random() * 0.6;
+            }
+
+            // draw a pixel-art diamond centred on (cx, cy)
+            function diamond(cx, cy, r, alpha) {
+                ctx.fillStyle = "rgba(255, 255, 255, " + alpha + ")";
+                for (let dy = -r; dy <= r; dy++) {
+                    const half = r - Math.abs(dy);
+                    ctx.fillRect(Math.round(cx - half), Math.round(cy + dy), half * 2 + 1, 1);
+                }
+            }
+
+            function init() {
+                resize();
+                const count = Math.round((w * h) / 16000);
+                stars = [];
+                for (let i = 0; i < count; i++) stars.push(makeStar());
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, w, h);
+
+                // time-gated emoji spawn
+                if (Date.now() >= nextEmojiAt) {
+                    spawnEmoji();
+                    nextEmojiAt = Date.now() + EMOJI_MIN_MS + Math.random() * (EMOJI_MAX_MS - EMOJI_MIN_MS);
+                }
+
+                for (let i = 0; i < stars.length; i++) {
+                    const s = stars[i];
+
+                    // rare emoji particle
+                    if (s.emoji) {
+                        ctx.font = s.size + "px serif";
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+                        ctx.globalAlpha = s.alpha;
+                        ctx.fillText(s.emoji, s.x, s.y);
+                        ctx.globalAlpha = 1;
+
+                        s.x += DX * s.speed;
+                        s.y += DY * s.speed;
+
+                        if (s.y > h + s.size || s.x < -s.size) {
+                            stars[i] = makeStar();
+                            stars[i].y = -stars[i].size;
+                            stars[i].x = Math.random() * (w + 80);
+                        }
+                        continue;
+                    }
+
+                    // short fading trail of shrinking diamonds
+                    for (let t = 2; t >= 1; t--) {
+                        const a = s.alpha * (1 - t / 3) * 0.45;
+                        diamond(
+                            s.x - DX * s.r * t * 1.4,
+                            s.y - DY * s.r * t * 1.4,
+                            Math.max(0, s.r - t),
+                            a
+                        );
+                    }
+
+                    // sparkle glint (thin cross)
+                    if (s.glint) {
+                        ctx.fillStyle = "rgba(255, 255, 255, " + (s.alpha * 0.3) + ")";
+                        ctx.fillRect(Math.round(s.x - s.r - 2), Math.round(s.y), s.r * 2 + 5, 1);
+                        ctx.fillRect(Math.round(s.x), Math.round(s.y - s.r - 2), 1, s.r * 2 + 5);
+                    }
+
+                    // star body + bright core
+                    diamond(s.x, s.y, s.r, s.alpha);
+                    ctx.fillStyle = "rgba(255, 255, 255, " + Math.min(1, s.alpha + 0.35) + ")";
+                    ctx.fillRect(Math.round(s.x), Math.round(s.y), 1, 1);
+
+                    s.x += DX * s.speed;
+                    s.y += DY * s.speed;
+
+                    if (s.y > h + s.r * 2 || s.x < -s.r * 2) {
+                        stars[i] = makeStar();
+                        stars[i].y = -stars[i].r * 2;
+                        stars[i].x = Math.random() * (w + 80);
+                    }
+                }
+                requestAnimationFrame(draw);
+            }
+
+            window.addEventListener("resize", init);
+            init();
+            draw();
+        })();
+    </script>
+</body>
+</html>
