@@ -312,10 +312,10 @@
                 folder: "html projects",
                 items: [
                     { file: "BJ.html", code: "BJ", name: "Paw-Pad 2100" },
-                    { file: "CL.html", code: "CL", name: "Captain's Log" },
-                    { file: "PL.html", code: "PL", name: "Planet Log" },
-                    { file: "RT.html", code: "RT", name: "Records" },
-                    { file: "SR.html", code: "SR", name: "Mission Dossier" }
+                    { file: "CL.html", code: "CL", name: "Acquisition Required | Crash Landing" },
+                    { file: "PL.html", code: "PL", name: "Tundratown / Desert Dunes" },
+                    { file: "RT.html", code: "RT", name: "Rocky's School Records" },
+                    { file: "SR.html", code: "SR", name: "Klyntar Mission Dossier" }
                 ]
             }
             // Add more folders like this later:
@@ -349,9 +349,11 @@
             a.className = "link";
             a.style.setProperty("--tinge", TINGES[tingeIndex++ % TINGES.length]);
 
-            const external = !!entry.url;
-            a.href = external ? entry.url : (folder ? folder + "/" : "") + entry.file;
-            if (external) {
+            // Loose links (no folder) always leave the Corner -> new tab + out arrow.
+            // Folder items stay in-page -> same tab + chevron.
+            const leaves = !folder;
+            a.href = entry.url ? entry.url : (folder ? folder + "/" : "") + entry.file;
+            if (leaves) {
                 a.target = "_blank";
                 a.rel = "noopener noreferrer";
             }
@@ -360,7 +362,7 @@
                 '<span class="meta">' +
                     '<span class="name">' + entry.name + '</span>' +
                 '</span>' +
-                '<span class="chev">' + (external ? '&#8599;' : '&#8250;') + '</span>';
+                '<span class="chev">' + (leaves ? '&#8599;' : '&#8250;') + '</span>';
             return a;
         }
 
